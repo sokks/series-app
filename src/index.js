@@ -2,8 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import {
-  searchSeries,
-  getEpisodes,
   getApiCalls,
   MIN_SEARCH_LEN,
   API_HOST,
