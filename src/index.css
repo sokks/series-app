@@ -3,7 +3,7 @@ body {
     background-color: #414141;
     /* background-color: hsl(54, 100%, 77%); */
     height: 100vh;
-    font: 'arial';
+    font-family: 'arial';
 }
 
 .content {
@@ -20,7 +20,7 @@ body {
 .header {
     /* background-color: aqua; */
     height: 30%;
-    min-height: 90px;
+    min-height: 120px;
     font-weight: 100;
     display: flex;
     flex-direction: column;
@@ -33,6 +33,7 @@ body {
   letter-spacing: 0.2em;
   /* color: #212529; */
   color: white;
+  font-family: 'Palatino Linotype,Book Antiqua,Palatino,serif';
 }
 
 .search-series-area {
@@ -87,6 +88,21 @@ body {
   cursor: pointer;
 }
 
+.search-res-on-the-flow .series-item .info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9em;
+}
+
+.search-res-on-the-flow .series-item .info .title{
+  /* width: 60%; */
+  font-weight: 400;
+}
+.search-res-on-the-flow .series-item .info .year{
+  /* width: 40%; */
+  color: #636363;
+}
+
 .search-res {
   display: flex;
   flex-direction: column;
@@ -103,28 +119,28 @@ body {
   cursor: pointer;
 }
 
-.series-item {
+.search-res .series-item {
   display: flex;
   justify-content: space-between;
 }
 
-.series-item .info {
+.search-res .series-item .info {
   display: flex;
   flex-direction: column;
   justify-content: center;
   width: 80%;
 }
 
-.series-item .info .year {
+.search-res .series-item .info .year {
   font-size: 0.9em;
   color: #636363;
 }
 
-.series-item .poster {
+.search-res .series-item .poster {
   width: 20%;
 }
 
-.series-item .title {
+.search-res .series-item .title {
   /* width: 60%; */
 }
 
@@ -133,9 +149,10 @@ body {
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   /* padding: 30px; */
   margin-top: 20px;
+  margin-bottom: 40px;
   width: 80%;
   max-width: 800px;
-  overflow: auto;
+  /* overflow: auto; */
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -179,6 +196,7 @@ body {
 }
 
 .episode-item .episode-rating {
+  min-width: 50px;
   font-weight: 600;
   font-size: 0.9em;
   color: #636363;

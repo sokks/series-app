@@ -121,6 +121,17 @@ class SeriesSearch extends React.Component {
               found_series_commited: resp_json,
               search_err_commited: null,
             });
+        })
+        .catch(() => {
+          console.log("search fetch error");
+          this.setState({
+            show_on_flow: false,
+            found_series: [],
+            search_err: null,
+            show_final: true, 
+            found_series_commited: [],
+            search_err_commited: "Service unavailable",
+          });
         });
     }
 
@@ -298,10 +309,9 @@ class SeriesSearch extends React.Component {
           <div className={"search-res-on-the-flow dropdown-content" + (this.state.show_on_flow ? " show" : "")} onMouseLeave={this.handleDropdownMouseLeave}>
             {this.state.found_series && this.state.found_series.length > 0 && this.state.found_series.map((series_item, idx) => (
               <div key={idx} data-idx={idx} className={"series-item" + (series_item.selected ? " selected" : "")} onClick={this.handleSeriesSelect} onMouseEnter={this.hadleSeriesItemHover}>
-                <div>{series_item.title}</div>
-                <div className="info">
-                  <div>({series_item.year})</div>
-                  {/* <div><span role="img" aria-label="star">⭐️</span>{series_item.imdb_rating}</div> */}
+                <div className="info" data-idx={idx}>
+                  <div data-idx={idx} className="title">{series_item.title}</div>
+                  <div data-idx={idx} className="year">({series_item.year})</div>
                 </div>
               </div>))}
           </div>
@@ -317,7 +327,7 @@ class SeriesSearch extends React.Component {
                 <div data-idx={idx} className="year">{series_item.year}</div>
               </div>
             </div>)) : <div className="empty-search-res">
-              {this.state.search_err_commited ? <p> Что-то пошло не так :( <br/> {this.state.search_err_commited} </p> : <p> Ничего не найдено </p>}
+              {this.state.search_err_commited ? <p> {/*Что-то пошло не так :( <br/> */}{this.state.search_err_commited} </p> : <p style={{paddingLeft: '10%'}}> Nothing found </p>}
             </div>}
         </div>}
       </div>
@@ -336,7 +346,7 @@ class Episodes extends React.Component {
     return (
       <div className="best-episodes-list">
         {this.props.error != null ? <div className="episodes-err"> 
-          Что-то пошло не так :( <br/>
+          {/*Что-то пошло не так :( <br/>*/}
           {this.props.error}
         </div> : (this.props.episodes && this.props.episodes.length > 0) ? <div className="episodes-ok">
           <div className="best-episodes-title">Best of "{this.props.title}"</div>
@@ -425,7 +435,7 @@ class App extends React.Component {
               console.log("episodes resp_json", resp_json);
               if (resp_json.error == null && (resp_json.Episodes == null || resp_json.Episodes.length === 0)) {
                 resp_json = {
-                  error: `No episodes found`,
+                  error: `We cannot find best episodes because there are no ratings on IMDb.`,
                   Title: resp_json.Title,
                   Episodes: [],
                 }
@@ -455,7 +465,7 @@ class App extends React.Component {
         <div className="content">
           <div className="header">
             <h1>LAZY SOAP</h1>
-            <p className="description text-center" style={{color: '#dadada', fontSize: '1.6rem'}}>watch only best episodes of series</p>
+            <p className="description text-center" style={{color: '#dadada', fontFamily: '"Lucida Sans Unicode", "Lucida Grande", sans-serif', fontSize: '1.5rem', fontWeight: 200}}>watch only best episodes of series</p>
           </div>
           <div className="search-series-area">
             <SeriesSearch onSeriesSelect={this.onSeriesSelect}/>
