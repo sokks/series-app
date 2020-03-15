@@ -60,7 +60,7 @@ body {
 .dropdown-content {
   display: none;
   position: absolute;
-  background-color: rgba(255,255,255, 0.6);
+  background-color: rgba(255,255,255);
   width: 93%;
   max-width: 700px;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
@@ -135,23 +135,38 @@ body {
 
 .episode-item {
   display: flex;
+  justify-content: center;
   padding: 20px;
   width: 100%;
+  padding-left: 5%;
+  padding-right: 5%;
 }
 
 .episode-item .episode-idx {
-  width: 10%;
+  width: 5%;
   min-width: 30px;
+}
+
+.episode-title {
+  font-weight: 600;
+  font-size: 0.9em;
 }
 
 .episode-item .episode-number {
   width: 40px;
   min-width: 30px;
   margin-right: 20px;
+  color: #636363;
+}
+
+.episode-item .episode-rating {
+  font-weight: 600;
+  font-size: 0.9em;
+  color: #636363;
 }
 
 .episode-item .episode-info {
-  width: 90%;
+  width: 95%;
   padding-right: 20px;
   display: flex;
   justify-content: space-between;

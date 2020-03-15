@@ -309,9 +309,9 @@ class SeriesSearch extends React.Component {
         {this.state.show_final && <div className="search-res">
           {this.state.found_series_commited && this.state.found_series_commited.length > 0 ? this.state.found_series_commited.map((series_item, idx) => (
             <div key={idx} data-idx={idx} className="series-item" onClick={this.handleSeriesCommitedSelect}>
-              <div>{series_item.title}</div>
-                <div className="info">
-                  <div>({series_item.year})</div>
+              <div data-idx={idx}>{series_item.title}</div>
+                <div className="info" data-idx={idx}>
+                  <div data-idx={idx}>({series_item.year})</div>
                   {/* <div><span role="img" aria-label="star">⭐️</span>{series_item.imdb_rating}</div> */}
                 </div>
             </div>)) : <div className="empty-search-res">
@@ -337,16 +337,16 @@ class Episodes extends React.Component {
           Что-то пошло не так :( <br/>
           {this.props.error}
         </div> : (this.props.episodes && this.props.episodes.length > 0) ? <div className="episodes-ok">
-          <div className="best-episodes-title">Лучшие серии сериала "{this.props.title}"</div>
+          <div className="best-episodes-title">Best of "{this.props.title}"</div>
           {this.props.episodes.map((episode, idx) => (
             <div key={idx} className="episode-item"> 
-              <div className="episode-idx">{idx}</div>
+              {/* <div className="episode-idx">#{idx+1}</div> */}
               <div className="episode-info">
                 <div className="episode-title" style={{display:'flex'}}>
                   <div className="episode-number">S{episode.Season}E{episode.Episode}</div>
                   <div>{episode.Title}</div>
                 </div>
-                <div><span role="img" aria-label="star">⭐️</span> &nbsp;{episode.imdbRating}</div>
+                <div className="episode-rating"><span role="img" aria-label="star">⭐️</span> &nbsp;{episode.imdbRating}</div>
               </div>
             </div>
           ))}
