@@ -1,13 +1,115 @@
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    /* background-color: cornflowerblue; */
+    background-color: #414141;
+    /* background-color: hsl(54, 100%, 77%); */
+    height: 100vh;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.content {
+    height: 100vh; /* TODO: why 100% doesn't work?*/
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: auto;
+    /* justify-content: space-evenly; */
+    /* background-color: cornflowerblue; */
+    
+}
+
+.header {
+    /* background-color: aqua; */
+    height: 30%;
+    font-weight: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.header h1 {
+  font-size: 5rem;
+  /* color: #212529; */
+  color: white;
+}
+
+.search-series-area {
+    background-color: white;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    padding: 30px;
+    width: 80%;
+    max-width: 800px;
+}
+
+.search-form {
+  width: 80%;
+  margin: 2% 10%;
+}
+
+/* там еще иконка 
+.search-form form input:focus {
+  border-bottom: 1px solid rgb(226, 112, 6) !important;
+  box-shadow: 0 1px 0 0 rgb(226, 112, 6) !important;
+}
+*/
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: rgba(255,255,255, 0.6);
+  width: 93%;
+  max-width: 700px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  margin-left: 7%;
+}
+
+.dropdown-content.show {
+  display: block;
+}
+
+.search-res-on-the-flow .series-item {
+  padding: 10px 20px;
+}
+
+.search-res-on-the-flow .series-item:hover {
+  /* background-color: rgba(226, 112, 6, 0.6); */
+  background-color: rgba(66, 133, 244, 0.6);
+  color: white;
+}
+
+.search-res {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-res .series-item {
+  padding: 5px 20px;
+}
+
+.search-res .series-item:hover {
+  /* background-color: rgb(226, 112, 6); */
+  background-color: rgba(66, 133, 244, 0.8);
+  color: white;
+}
+
+.best-episodes-area {
+  background-color: white;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  /* padding: 30px; */
+  margin-top: 20px;
+  width: 80%;
+  max-width: 800px;
+  /* overflow: auto; */
+}
+
+.episode-item {
+  padding: 20px;
+}
+
+.larger-text {
+    font-size: 2rem;
 }
