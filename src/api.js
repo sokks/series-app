@@ -1,5 +1,5 @@
-const API_HOST = "https://soap.nikscorp.com";
-
+export const API_HOST = "https://soap.nikscorp.com";
+export const MIN_SEARCH_LEN = 4;
 
 var apiCalls = [];
 
@@ -13,24 +13,24 @@ export const getApiCalls = () => {
 }; 
 
 
-export const searchSeries = (search_str) => {
+export function searchSeries(search_str){
   let path = `/search/${search_str}`
   let resp_ip = "127.0.0.1";
   // onApiCall(path, resp_ip);
-  let resp = callApi(path);
-  console.log("search resp", resp);
-  if (resp == null) {
-    return {
-      items: [],
-      err: "Ошибочка (тип 500)",
-    }
-  }
-  return {
-    items: resp,
-    err: null,
-  }
+  // let resp = await callApi(path);
+  // console.log("search resp", resp);
+  // if (resp == null) {
+  //   return {
+  //     items: [],
+  //     err: "Ошибочка (тип 500)",
+  //   }
+  // }
+  // return {
+  //   items: resp,
+  //   err: null,
+  // }
   
-  // sreturn getExampleSeriesData(search_str);
+  return getExampleSeriesData(search_str);
 }
 
 export const getEpisodes = (series_imdb_id) => {

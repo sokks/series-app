@@ -123,7 +123,20 @@ body {
 }
 
 .episode-item {
+  display: flex;
   padding: 20px;
+  width: 100%;
+}
+
+.episode-item .episode-idx {
+  width: 10%;
+  min-width: 30px;
+}
+
+.episode-item .episode-info {
+  width: 90%;
+  display: flex;
+  justify-content: space-between;
 }
 
 .larger-text {

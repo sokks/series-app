@@ -5,6 +5,8 @@ import {
   searchSeries,
   getEpisodes,
   getApiCalls,
+  MIN_SEARCH_LEN,
+  API_HOST,
 } from './api';
 
 import '@fortawesome/fontawesome-free/css/all.min.css'; 
@@ -52,6 +54,23 @@ class SeriesSearch extends React.Component {
     });
   }
 
+  doSearch = (search_str) => {
+    fetch(API_HOST+`/search/${search_str}`)
+      .then(resp => {
+        let json = resp.json();
+        console.log(json);
+        return json;
+      })
+      .then(resp_json => {
+          console.log(resp_json);
+          this.setState({
+            found_series: resp_json,
+            show_on_flow: (resp_json && resp_json.length > 0),
+            search_err: null,
+          });
+      });
+  }
+
   handleSearchInputChange = (e) => {
     let search_str = e.target.value;
     console.log("input changed to", search_str);
@@ -59,31 +78,18 @@ class SeriesSearch extends React.Component {
     this.blockMouseHover();
 
     this.setState({
+      search_input: search_str,
       show_on_flow: false,
       on_the_flow_selected_idx: -1,
     }, () => {
-      let res_items = this.state.found_series;
-      let res_err = this.state.res_err;
-      if (search_str.length >= 4) {
-        let res = searchSeries(search_str);
-        res_items = res.items;
-        res_err = res.err;
-      }
-      if (res_err == null || search_str.length < 4) {
+      if (search_str.length < MIN_SEARCH_LEN) {
         this.setState({
-          search_input: search_str,
-          found_series: res_items,
-          show_on_flow: (res_items.length > 0),
+          found_series: [],
           search_err: null,
         });
-      } else {
-        this.setState({
-          search_input: search_str,
-          found_series: [],
-          show_on_flow: false,
-          search_err: res_err,
-        });
+        return;
       }
+      this.doSearch(search_str);
     });
   }
 
@@ -98,23 +104,32 @@ class SeriesSearch extends React.Component {
       return;
     }
 
-    let set_final = () => {
-      console.log("set_final of ", this.state.search_input);
-      this.setState({
-        show_final: true, 
-        show_on_flow: false,
-        found_series_commited: this.state.found_series,
-        search_err_commited: this.state.search_err,
-        found_series: [],
-        search_input: "",
-      });
+    const doSearchAndSetFinal = (search_str) => {
+      fetch(API_HOST+`/search/${search_str}`)
+        .then(resp => {
+          let json = resp.json();
+          console.log(json);
+          return json;
+        })
+        .then(resp_json => {
+            console.log(resp_json);
+            this.setState({
+              search_input: "",
+              show_on_flow: false,
+              found_series: [],
+              search_err: null,
+              show_final: true, 
+              found_series_commited: resp_json,
+              search_err_commited: null,
+            });
+        });
     }
 
     if (this.state.on_the_flow_selected_idx >= 0) {
       console.log("upd search_input")
       let new_found_series = this.state.found_series;
       new_found_series[this.state.on_the_flow_selected_idx].selected = false;
-      let selected_imdb_id = new_found_series[this.state.on_the_flow_selected_idx].imdb_id;
+      let selected_imdb_id = new_found_series[this.state.on_the_flow_selected_idx].imdbID;
       let callback = () => {
         return this.doFinalSeriesSelect(selected_imdb_id);
       }
@@ -130,9 +145,8 @@ class SeriesSearch extends React.Component {
         search_err_commited: null,
       }, callback);
     } else {
-      set_final();
+      doSearchAndSetFinal(this.state.search_input);
     }
-    
   }
 
   handleOnTheFlowSelection = (e) => {
@@ -223,27 +237,33 @@ class SeriesSearch extends React.Component {
   }
 
   handleSeriesSelect = (e) => {
-    let selected_series = this.state.found_series[e.target.dataset.idx];
-    console.log("selected series ", selected_series.title, " with imdb_id ", selected_series.imdb_id);
+    // e.persist();
+    console.log("handleSeriesSelect", this.state.on_the_flow_selected_idx);
+    // let selected_idx = parseInt(e.target.dataset.idx);
+    let selected_idx = this.state.on_the_flow_selected_idx;
+    let selected_series = this.state.found_series[selected_idx];
+    console.log(`e.idx: ${e.target.dataset.idx} selected_idx: ${selected_idx}, selected_series: ${selected_series}`);
+    console.log("selected series ", selected_series.title, " with imdb_id ", selected_series.imdbID);
     this.setState({
       search_input: "",
       show_final: true, 
       show_on_flow: false,
       found_series_commited: [selected_series],
       search_err_commited: null,
-    }, this.props.onSeriesSelect(selected_series.imdb_id));
+    }, this.props.onSeriesSelect(selected_series.imdbID));
   }
 
   handleSeriesCommitedSelect = (e) => {
-    let selected_series = this.state.found_series_commited[e.target.dataset.idx];
-    console.log("selected series ", selected_series.title, " with imdb_id ", selected_series.imdb_id);
+    let selected_idx = parseInt(e.target.dataset.idx);
+    let selected_series = this.state.found_series_commited[selected_idx];
+    console.log("selected series ", selected_series.title, " with imdb_id ", selected_series.imdbID);
     this.setState({
       show_final: true, 
       show_on_flow: false,
-      // found_series_commited: [selected_series],
+      found_series_commited: [selected_series],
       search_err_commited: null,
     });
-    this.props.onSeriesSelect(selected_series.imdb_id);
+    this.props.onSeriesSelect(selected_series.imdbID);
   }
 
   handleEscPress = (e) => {
@@ -293,7 +313,7 @@ class SeriesSearch extends React.Component {
               <div>{series_item.title}</div>
                 <div className="info">
                   <div>({series_item.year})</div>
-                  <div><span role="img" aria-label="star">⭐️</span>{series_item.imdb_rating}</div>
+                  {/* <div><span role="img" aria-label="star">⭐️</span>{series_item.imdb_rating}</div> */}
                 </div>
             </div>)) : <div className="empty-search-res">
               {this.state.search_err_commited ? <p> Что-то пошло не так :( <br/> {this.state.search_err_commited} </p> : <p> Ничего не найдено </p>}
@@ -308,34 +328,24 @@ class Episodes extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      episodes: [],
-      err: null,
     };
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    console.log("getDerivedStateFromProps");
-    console.log(nextProps);
-    console.log(prevState);
-    let res = getEpisodes(nextProps.imdbId);
-    return {
-      title: (res.err == null ? res.title : prevState.title),
-      episodes: (res.err == null ? res.episodes : prevState.episodes),
-      err: res.err,
-    };
-  }
- 
   render() {
     return (
       <div className="best-episodes-list">
-        {this.err != null ? <div className="episodes-err"> 
+        {this.props.error != null ? <div className="episodes-err"> 
           Что-то пошло не так :( <br/>
-          {this.state.err}
-        </div> : (this.state.episodes && this.state.episodes.length > 0) ? <div className="episodes-ok">
-          <div className="best-episodes-title">Лучшие серии сериала "{this.state.title}"</div>
-          {this.state.episodes.map((episode, idx) => (
+          {this.props.error}
+        </div> : (this.props.episodes && this.props.episodes.length > 0) ? <div className="episodes-ok">
+          <div className="best-episodes-title">Лучшие серии сериала "{this.props.title}"</div>
+          {this.props.episodes.map((episode, idx) => (
             <div key={idx} className="episode-item"> 
-              {idx} {episode.title}
+              <div className="episode-idx">{idx}</div>
+              <div className="episode-info">
+                <div>{episode.Title}</div>
+                <div><span role="img" aria-label="star">⭐️</span>{episode.imdbRating}</div>
+              </div>
             </div>
           ))}
         </div> : null}
@@ -369,15 +379,49 @@ class App extends React.Component {
     super(props);
     this.state = {
       active_imdb_id: 0,
+      active_title: "",
+      active_episodes: [],
+      active_error: null,
       show_api_reqs: true,
     }
   }
 
   onSeriesSelect = (series_imdb_id) => {
     console.log("App has just known that you selected imdb_id ", series_imdb_id);
-    this.setState({
-      active_imdb_id: series_imdb_id,
-    });
+    
+    const doEpisodesSearch = (imdbID) => {
+      fetch(API_HOST+`/id/${imdbID}`)
+        .then(resp => {
+          console.log("episodes resp", resp);
+          if (resp.status !== 200) {
+            return {
+              error: `Unexpected status code ${resp.status}`,
+              Title: "",
+              Episodes: [],
+            }
+          }
+          // let json = resp.json();
+          return resp.json();;
+        })
+        .then(resp_json => {
+            console.log("episodes resp_json", resp_json);
+            if (resp_json.error == null && (resp_json.Episodes == null || resp_json.Episodes.length === 0)) {
+              resp_json = {
+                error: `No episodes found`,
+                Title: resp_json.Title,
+                Episodes: [],
+              }
+            }
+            this.setState({
+              active_imdb_id: series_imdb_id,
+              active_episodes: resp_json.Episodes,
+              active_title: resp_json.Title,
+              active_error: resp_json.error,
+            });
+        });
+    }
+    
+    doEpisodesSearch(series_imdb_id);
   };
 
   render() {
@@ -391,7 +435,10 @@ class App extends React.Component {
             <SeriesSearch onSeriesSelect={this.onSeriesSelect}/>
           </div>
           <div className="best-episodes-area">
-            <Episodes imdbId={this.state.active_imdb_id}/>
+            <Episodes imdbId={this.state.active_imdb_id} 
+              title={this.state.active_title} 
+              episodes={this.state.active_episodes}
+              error={this.state.active_error}/>
           </div>
         </div>
         {this.state.show_api_reqs && 
