@@ -62,12 +62,18 @@ class SeriesSearch extends React.Component {
       show_on_flow: false,
       on_the_flow_selected_idx: -1,
     }, () => {
-      let res = searchSeries(search_str);
-      if (res.err == null) {
+      let res_items = this.state.found_series;
+      let res_err = this.state.res_err;
+      if (search_str.length >= 4) {
+        let res = searchSeries(search_str);
+        res_items = res.items;
+        res_err = res.err;
+      }
+      if (res_err == null || search_str.length < 4) {
         this.setState({
           search_input: search_str,
-          found_series: res.items,
-          show_on_flow: (res.items.length > 0),
+          found_series: res_items,
+          show_on_flow: (res_items.length > 0),
           search_err: null,
         });
       } else {
@@ -75,7 +81,7 @@ class SeriesSearch extends React.Component {
           search_input: search_str,
           found_series: [],
           show_on_flow: false,
-          search_err: res.err,
+          search_err: res_err,
         });
       }
     });

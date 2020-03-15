@@ -1,3 +1,5 @@
+const API_HOST = "https://soap.nikscorp.com";
+
 
 var apiCalls = [];
 
@@ -12,11 +14,23 @@ export const getApiCalls = () => {
 
 
 export const searchSeries = (search_str) => {
-  // TODO
   let path = `/search/${search_str}`
   let resp_ip = "127.0.0.1";
-  onApiCall(path, resp_ip);
-  return getExampleSeriesData(search_str);
+  // onApiCall(path, resp_ip);
+  let resp = callApi(path);
+  console.log("search resp", resp);
+  if (resp == null) {
+    return {
+      items: [],
+      err: "Ошибочка (тип 500)",
+    }
+  }
+  return {
+    items: resp,
+    err: null,
+  }
+  
+  // sreturn getExampleSeriesData(search_str);
 }
 
 export const getEpisodes = (series_imdb_id) => {
@@ -25,6 +39,22 @@ export const getEpisodes = (series_imdb_id) => {
   onApiCall(path, resp_ip);
 
   return getExampleEpisodesData(series_imdb_id);
+}
+
+export async function callApi(path) {
+  try {
+    let response = await fetch(API_HOST + path, {});
+
+    if (response.status === 200) {
+      let json = await response.json();
+      console.log(json);
+      return { json };
+    } else {
+      return { errors: { message: 'Ошибка сервера' } }
+    }
+  } catch (errors) {
+    return { errors };
+  }
 }
 
 const getExampleSeriesData = (search_str) => {
@@ -61,11 +91,11 @@ const getExampleSeriesData = (search_str) => {
           year: "1999-2001",
           imdb_rating: 8.4,
         },
-    ],
-    err: null,
-  };
-  }else if (search_str === "Говно") {
-      return {items: [], err: "Вы ввели говно а мы не нашли его"}
+      ],
+      err: null,
+    };
+  } else if (search_str === "Говно") {
+    return {items: [], err: "Вы ввели говно а мы не нашли его"}
   }
   return {items: [], err: null};
 };
