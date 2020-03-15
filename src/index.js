@@ -286,7 +286,7 @@ class SeriesSearch extends React.Component {
       <div>
         <div className="search-form dropdown">
           <form>
-            <p className="h5 text-left">Какой сериал вы ищете?</p>
+            <p className="h5 text-left">What series are you looking for?</p>
             <div className="grey-text larger-text">
               <MDBInput icon="search" group type="text" size="lg" validate 
                 value={this.state.search_input}
@@ -309,11 +309,13 @@ class SeriesSearch extends React.Component {
         {this.state.show_final && <div className="search-res">
           {this.state.found_series_commited && this.state.found_series_commited.length > 0 ? this.state.found_series_commited.map((series_item, idx) => (
             <div key={idx} data-idx={idx} className="series-item" onClick={this.handleSeriesCommitedSelect}>
-              <div data-idx={idx}>{series_item.title}</div>
-                <div className="info" data-idx={idx}>
-                  <div data-idx={idx}>({series_item.year})</div>
-                  {/* <div><span role="img" aria-label="star">⭐️</span>{series_item.imdb_rating}</div> */}
-                </div>
+              <div data-idx={idx} className="poster">
+                <img src={series_item.poster} style={{height: 60, maxWidth: 100}}/>
+              </div>
+              <div className="info" data-idx={idx}>
+                <div data-idx={idx} className="title">{series_item.title}</div>
+                <div data-idx={idx} className="year">{series_item.year}</div>
+              </div>
             </div>)) : <div className="empty-search-res">
               {this.state.search_err_commited ? <p> Что-то пошло не так :( <br/> {this.state.search_err_commited} </p> : <p> Ничего не найдено </p>}
             </div>}
@@ -452,7 +454,8 @@ class App extends React.Component {
       <div className="app-area">
         <div className="content">
           <div className="header">
-            <h1>HEADER</h1>
+            <h1>LAZY SOAP</h1>
+            <p className="description text-center" style={{color: '#dadada', fontSize: '1.6rem'}}>watch only best episodes of series</p>
           </div>
           <div className="search-series-area">
             <SeriesSearch onSeriesSelect={this.onSeriesSelect}/>
