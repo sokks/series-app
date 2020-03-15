@@ -1,42 +1,79 @@
 
+var apiCalls = [];
+
+const onApiCall = (path, resp_ip) => {
+  console.log("App has just known that api call was made", path, resp_ip);
+  apiCalls = [...apiCalls, {path: path, resp_ip: resp_ip}];
+};
+
+export const getApiCalls = () => {
+  return apiCalls;
+}; 
+
+
 export const searchSeries = (search_str) => {
   // TODO
+  let path = `/search/${search_str}`
+  let resp_ip = "127.0.0.1";
+  onApiCall(path, resp_ip);
+  return getExampleSeriesData(search_str);
+}
+
+export const getEpisodes = (series_imdb_id) => {
+  let path = `/id/${series_imdb_id}`
+  let resp_ip = "127.0.0.1";
+  onApiCall(path, resp_ip);
+
+  return getExampleEpisodesData(series_imdb_id);
+}
+
+const getExampleSeriesData = (search_str) => {
   if (search_str === "Как") {
     return {
       items:[
         {
-          imdb_id: 1234,
+          imdb_id: "1234",
           title: "Как я встретил вашу маму?",
-          started: 1998,
-          finished: 2010,
-          avg_rating: 8.7,
+          year: "1998-2010",
+          imdb_rating: 8.7,
         },
         {
-          imdb_id: 1237,
+          imdb_id: "tt1237",
           title: "Как я встретил вашего папу?",
-          started: 1999,
-          finished: 2001,
-          avg_rating: 8.4,
+          year: "1999-2001",
+          imdb_rating: 8.4,
         },
         {
-          imdb_id: 1238,
+          imdb_id: "1238",
           title: "Как быть?",
-          started: 2020,
-          finished: -1,
-          avg_rating: 8.3,
+          year: "2020-",
+          imdb_rating: 8.3,
         },
       ],
       err: null,
     };
-  } else if (search_str === "Говно") {
+  } else if (search_str === "Как я встретил вашего папу?") {
+    return {
+      items:[
+        {
+          imdb_id: "tt1237",
+          title: "Как я встретил вашего папу?",
+          year: "1999-2001",
+          imdb_rating: 8.4,
+        },
+    ],
+    err: null,
+  };
+  }else if (search_str === "Говно") {
       return {items: [], err: "Вы ввели говно а мы не нашли его"}
   }
   return {items: [], err: null};
-}
+};
 
-export const getEpisodes = (series_imdb_id) => {
-  if (series_imdb_id === 1234) {
+const getExampleEpisodesData = (series_imdb_id) => {
+  if (series_imdb_id === "1234") {
     return {
+      title: "Как я встретил вашу маму?",
       episodes: [
         {
           season: 1,
@@ -59,8 +96,9 @@ export const getEpisodes = (series_imdb_id) => {
       ],
       err: null,
     }
-  } else if (series_imdb_id === 1237) {
+  } else if (series_imdb_id === "tt1237") {
     return {
+      title: "Как я встретил вашего папу?",
       episodes: [
         {
           season: 1,
@@ -106,4 +144,4 @@ export const getEpisodes = (series_imdb_id) => {
     episodes: [],
     err: null,
   }
-}
+};

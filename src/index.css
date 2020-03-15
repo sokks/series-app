@@ -75,10 +75,12 @@ body {
   padding: 10px 20px;
 }
 
-.search-res-on-the-flow .series-item:hover {
+
+.search-res-on-the-flow .series-item.selected {
   /* background-color: rgba(226, 112, 6, 0.6); */
   background-color: rgba(66, 133, 244, 0.6);
   color: white;
+  cursor: pointer;
 }
 
 .search-res {
@@ -87,13 +89,23 @@ body {
 }
 
 .search-res .series-item {
-  padding: 5px 20px;
+  padding: 15px 20px;
 }
 
 .search-res .series-item:hover {
   /* background-color: rgb(226, 112, 6); */
   background-color: rgba(66, 133, 244, 0.8);
   color: white;
+  cursor: pointer;
+}
+
+.series-item {
+  display: flex;
+  justify-content: space-between;
+}
+
+.series-item .info {
+  display: flex;
 }
 
 .best-episodes-area {
@@ -104,6 +116,10 @@ body {
   width: 80%;
   max-width: 800px;
   /* overflow: auto; */
+}
+
+.best-episodes-title {
+  padding: 30px 30px 30px 50px;
 }
 
 .episode-item {

@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import {
   searchSeries,
   getEpisodes,
+  getApiCalls,
 } from './api';
 
 import '@fortawesome/fontawesome-free/css/all.min.css'; 
@@ -15,6 +16,7 @@ import {
   MDBInput, 
 } from 'mdbreact';
 
+
 class SeriesSearch extends React.Component {
   
   constructor(props) {
@@ -24,40 +26,74 @@ class SeriesSearch extends React.Component {
       found_series: [],
       search_err: null,
       show_on_flow: false,
+      on_the_flow_selected_idx: -1,
       
       found_series_commited: [],
       search_err_commited: null,
       show_final: false,
+
+      mouse_hover_blocked: true,
     };
     this.handleEscPress = this.handleEscPress.bind(this);
+    this.goToNextDropdownItem = this.goToNextDropdownItem.bind(this);
+    this.goToPrevDropdownItem = this.goToPrevDropdownItem.bind(this);
+  }
+
+  blockMouseHover = () => {
+    console.log("block mouse hover");
+    this.setState({
+      mouse_hover_blocked: true,
+    });
+  }
+  unblockMouseHover = () => {
+    console.log("unblock mouse hover");
+    this.setState({
+      mouse_hover_blocked: false,
+    });
   }
 
   handleSearchInputChange = (e) => {
-    // this.setState({search_input: e.target.value}); /* TODO: no last letter :( */
-    // console.log("this.state.search_input changed to ", this.state.search_input);
-    console.log(e.target.value);
-    let res = searchSeries(e.target.value);
-    if (res.err == null) {
-      this.setState({
-        search_input: e.target.value,
-        found_series: res.items,
-        show_on_flow: (res.items.length > 0),
-        search_err: null,
-      });
-    } else {
-      this.setState({
-        search_input: e.target.value,
-        found_series: [],
-        show_on_flow: false,
-        search_err: res.err,
-      });
-    }
+    let search_str = e.target.value;
+    console.log("input changed to", search_str);
+
+    this.blockMouseHover();
+
+    this.setState({
+      show_on_flow: false,
+      on_the_flow_selected_idx: -1,
+    }, () => {
+      let res = searchSeries(search_str);
+      if (res.err == null) {
+        this.setState({
+          search_input: search_str,
+          found_series: res.items,
+          show_on_flow: (res.items.length > 0),
+          search_err: null,
+        });
+      } else {
+        this.setState({
+          search_input: search_str,
+          found_series: [],
+          show_on_flow: false,
+          search_err: res.err,
+        });
+      }
+    });
   }
 
   doFinalSearch = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      console.log("doFinalSearch of ", this.state.search_input);
+    if (e.key !== 'Enter') {
+      return;
+    }
+    e.preventDefault();
+    console.log("doFinalSearch of ", this.state.search_input);
+
+    if (this.state.search_input === "") {
+      return;
+    }
+
+    let set_final = () => {
+      console.log("set_final of ", this.state.search_input);
       this.setState({
         show_final: true, 
         show_on_flow: false,
@@ -67,15 +103,117 @@ class SeriesSearch extends React.Component {
         search_input: "",
       });
     }
+
+    if (this.state.on_the_flow_selected_idx >= 0) {
+      console.log("upd search_input")
+      let new_found_series = this.state.found_series;
+      new_found_series[this.state.on_the_flow_selected_idx].selected = false;
+      let selected_imdb_id = new_found_series[this.state.on_the_flow_selected_idx].imdb_id;
+      let callback = () => {
+        return this.doFinalSeriesSelect(selected_imdb_id);
+      }
+      this.setState({
+        show_on_flow: false,
+        // search_input: this.state.found_series[this.state.on_the_flow_selected_idx].title,
+        search_input: "",
+        found_series: [],
+        search_err: null,
+        on_the_flow_selected_idx: -1,
+        show_final: true,
+        found_series_commited: [new_found_series[this.state.on_the_flow_selected_idx]],
+        search_err_commited: null,
+      }, callback);
+    } else {
+      set_final();
+    }
+    
   }
 
   handleOnTheFlowSelection = (e) => {
     if (e.keyCode === 40) { // down
       console.log("down arrow pressed");
-      // this.goToNextDropdownItem();
+      this.goToNextDropdownItem();
     } else if (e.keyCode === 38) { // up
       console.log("up arrow pressed");
+      this.goToPrevDropdownItem();
     }
+  }
+
+  hadleSeriesItemHover = (e) => {
+    if (this.state.mouse_hover_blocked) {
+      return;
+    }
+    let selected_idx = parseInt(e.target.dataset.idx);
+    console.log("mouse hover on", selected_idx);
+    let prev_selection_idx = this.state.on_the_flow_selected_idx;
+    if (selected_idx !== prev_selection_idx) {
+      let new_found_series = this.state.found_series;
+      if (prev_selection_idx >= 0) {
+        new_found_series[prev_selection_idx].selected = false;
+      }
+      new_found_series[selected_idx].selected = true;
+      this.setState({
+        on_the_flow_selected_idx: selected_idx,
+        found_series: new_found_series,
+      });
+    }
+  }
+
+  handleDropdownMouseLeave = (e) => {
+    console.log("mouse leaved dropdown");
+    let prev_selection_idx = this.state.on_the_flow_selected_idx;
+    if (prev_selection_idx < 0) {
+      return;
+    }
+    let new_found_series = this.state.found_series;
+    new_found_series[prev_selection_idx].selected = false;
+    this.setState({
+      on_the_flow_selected_idx: -1,
+      found_series: new_found_series,
+    });
+  }
+
+  goToNextDropdownItem = () => {
+    if (this.state.found_series.length === 0) {
+      return;
+    }
+    if (this.state.on_the_flow_selected_idx >= this.state.found_series.length-1) {
+      return;
+    }
+    let prev_selection_idx = this.state.on_the_flow_selected_idx;
+    let new_found_series = this.state.found_series;
+    if (prev_selection_idx >= 0) {
+      new_found_series[prev_selection_idx].selected = false;
+    }
+    new_found_series[prev_selection_idx+1].selected = true;
+    this.setState({
+      on_the_flow_selected_idx: prev_selection_idx+1,
+      found_series: new_found_series,
+    }, () => {console.log("selected_idx:", this.state.on_the_flow_selected_idx);});
+  }
+
+  goToPrevDropdownItem = () => {
+    if (this.state.found_series.length === 0) {
+      return;
+    }
+    if (this.state.on_the_flow_selected_idx < 0 ) {
+      return;
+    }
+    let prev_selection_idx = this.state.on_the_flow_selected_idx;
+    let new_found_series = this.state.found_series;
+    new_found_series[prev_selection_idx].selected = false;
+    if (prev_selection_idx > 0) {
+      new_found_series[prev_selection_idx-1].selected = true;
+    }
+    this.setState({
+      on_the_flow_selected_idx: prev_selection_idx-1,
+      found_series: new_found_series,
+    }, () => {console.log("selected_idx:", this.state.on_the_flow_selected_idx);});
+  }
+
+  doFinalSeriesSelect = (imdb_id) => {
+    console.log("doFinalSeriesSelect of ", imdb_id);
+    this.props.onSeriesSelect(imdb_id);
   }
 
   handleSeriesSelect = (e) => {
@@ -87,8 +225,7 @@ class SeriesSearch extends React.Component {
       show_on_flow: false,
       found_series_commited: [selected_series],
       search_err_commited: null,
-    });
-    this.props.onSeriesSelect(selected_series.imdb_id);
+    }, this.props.onSeriesSelect(selected_series.imdb_id));
   }
 
   handleSeriesCommitedSelect = (e) => {
@@ -97,7 +234,7 @@ class SeriesSearch extends React.Component {
     this.setState({
       show_final: true, 
       show_on_flow: false,
-      found_series_commited: [selected_series],
+      // found_series_commited: [selected_series],
       search_err_commited: null,
     });
     this.props.onSeriesSelect(selected_series.imdb_id);
@@ -116,6 +253,7 @@ class SeriesSearch extends React.Component {
 
   componentDidMount(){
     document.addEventListener("keydown", this.handleEscPress, false);
+    document.addEventListener("mousemove", this.unblockMouseHover, false);
   }
 
   render() {
@@ -132,17 +270,25 @@ class SeriesSearch extends React.Component {
                 />
             </div>
           </form>
-          <div className={"search-res-on-the-flow dropdown-content" + (this.state.show_on_flow ? " show" : "")}>
+          <div className={"search-res-on-the-flow dropdown-content" + (this.state.show_on_flow ? " show" : "")} onMouseLeave={this.handleDropdownMouseLeave}>
             {this.state.found_series && this.state.found_series.length > 0 && this.state.found_series.map((series_item, idx) => (
-              <div key={idx} data-idx={idx} className="series-item" onClick={this.handleSeriesSelect}>
-                {series_item.title}
+              <div key={idx} data-idx={idx} className={"series-item" + (series_item.selected ? " selected" : "")} onClick={this.handleSeriesSelect} onMouseEnter={this.hadleSeriesItemHover}>
+                <div>{series_item.title}</div>
+                <div className="info">
+                  <div>({series_item.year})</div>
+                  <div><span role="img" aria-label="star">⭐️</span>{series_item.imdb_rating}</div>
+                </div>
               </div>))}
           </div>
         </div>
         {this.state.show_final && <div className="search-res">
           {this.state.found_series_commited && this.state.found_series_commited.length > 0 ? this.state.found_series_commited.map((series_item, idx) => (
             <div key={idx} data-idx={idx} className="series-item" onClick={this.handleSeriesCommitedSelect}>
-              {series_item.title}
+              <div>{series_item.title}</div>
+                <div className="info">
+                  <div>({series_item.year})</div>
+                  <div><span role="img" aria-label="star">⭐️</span>{series_item.imdb_rating}</div>
+                </div>
             </div>)) : <div className="empty-search-res">
               {this.state.search_err_commited ? <p> Что-то пошло не так :( <br/> {this.state.search_err_commited} </p> : <p> Ничего не найдено </p>}
             </div>}
@@ -159,15 +305,15 @@ class Episodes extends React.Component {
       episodes: [],
       err: null,
     };
-    this.cur_res = {
-      episodes: [],
-      err: null,
-    }
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
+    console.log("getDerivedStateFromProps");
+    console.log(nextProps);
+    console.log(prevState);
     let res = getEpisodes(nextProps.imdbId);
     return {
+      title: (res.err == null ? res.title : prevState.title),
       episodes: (res.err == null ? res.episodes : prevState.episodes),
       err: res.err,
     };
@@ -179,13 +325,14 @@ class Episodes extends React.Component {
         {this.err != null ? <div className="episodes-err"> 
           Что-то пошло не так :( <br/>
           {this.state.err}
-        </div> : <div className="episodes-ok">
-          {this.state.episodes && this.state.episodes.length > 0 && this.state.episodes.map((episode, idx) => (
-            <div className="episode-item"> 
+        </div> : (this.state.episodes && this.state.episodes.length > 0) ? <div className="episodes-ok">
+          <div className="best-episodes-title">Лучшие серии сериала "{this.state.title}"</div>
+          {this.state.episodes.map((episode, idx) => (
+            <div key={idx} className="episode-item"> 
               {idx} {episode.title}
             </div>
           ))}
-        </div>}
+        </div> : null}
       </div>
     );
   }
@@ -195,13 +342,18 @@ class ApiReqs extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      reqs: [],
+      reqs: getApiCalls(),
     }
   }
 
   render() {
     return (<div>
-      
+      {this.props.reqs && this.props.reqs.length > 0 && this.props.reqs.map((req, idx) => (
+        <div key={idx}>
+          {req.path}
+          {req.resp_ip}
+        </div>
+      ))}
     </div>);
   }
 }
@@ -220,7 +372,7 @@ class App extends React.Component {
     this.setState({
       active_imdb_id: series_imdb_id,
     });
-  }
+  };
 
   render() {
     return (
