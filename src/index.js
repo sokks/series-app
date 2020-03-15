@@ -372,6 +372,16 @@ class ApiReqs extends React.Component {
   }
 }
 
+class Spinner extends React.Component {
+  render() {
+    return (<div className="spinner">
+      <div className="spinner-border" role="status">
+        <span className="sr-only">Loading...</span>
+      </div>
+    </div>);
+  }
+}
+
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -381,45 +391,56 @@ class App extends React.Component {
       active_episodes: [],
       active_error: null,
       show_api_reqs: true,
+      show_spinner: false,
     }
   }
 
   onSeriesSelect = (series_imdb_id) => {
     console.log("App has just known that you selected imdb_id ", series_imdb_id);
     
-    const doEpisodesSearch = (imdbID) => {
-      fetch(API_HOST+`/id/${imdbID}`)
-        .then(resp => {
-          console.log("episodes resp", resp);
-          if (resp.status !== 200) {
-            return {
-              error: `Unexpected status code ${resp.status}`,
-              Title: "",
-              Episodes: [],
-            }
-          }
-          // let json = resp.json();
-          return resp.json();;
-        })
-        .then(resp_json => {
-            console.log("episodes resp_json", resp_json);
-            if (resp_json.error == null && (resp_json.Episodes == null || resp_json.Episodes.length === 0)) {
-              resp_json = {
-                error: `No episodes found`,
-                Title: resp_json.Title,
+    const doEpisodesSearch = () => {
+      console.log("show_spinner:", this.state.show_spinner);
+
+      const doFetch = () => {
+        fetch(API_HOST+`/id/${series_imdb_id}`)
+          .then(resp => {
+            console.log("episodes resp", resp);
+            if (resp.status !== 200) {
+              return {
+                error: `Unexpected status code ${resp.status}`,
+                Title: "",
                 Episodes: [],
               }
             }
-            this.setState({
-              active_imdb_id: series_imdb_id,
-              active_episodes: resp_json.Episodes,
-              active_title: resp_json.Title,
-              active_error: resp_json.error,
-            });
-        });
+            // let json = resp.json();
+            return resp.json();;
+          })
+          .then(resp_json => {
+              console.log("episodes resp_json", resp_json);
+              if (resp_json.error == null && (resp_json.Episodes == null || resp_json.Episodes.length === 0)) {
+                resp_json = {
+                  error: `No episodes found`,
+                  Title: resp_json.Title,
+                  Episodes: [],
+                }
+              }
+              this.setState({
+                active_imdb_id: series_imdb_id,
+                active_episodes: resp_json.Episodes,
+                active_title: resp_json.Title,
+                active_error: resp_json.error,
+              }, this.setState({
+                show_spinner: false,
+              }));
+          });
+      }
+      // setTimeout(doFetch, 30000);
+      doFetch();
     }
     
-    doEpisodesSearch(series_imdb_id);
+    this.setState({
+      show_spinner: true,
+    }, doEpisodesSearch);
   };
 
   render() {
@@ -432,11 +453,14 @@ class App extends React.Component {
           <div className="search-series-area">
             <SeriesSearch onSeriesSelect={this.onSeriesSelect}/>
           </div>
+          {this.state.show_spinner && <Spinner/>}
           <div className="best-episodes-area">
+            {!this.state.show_spinner && this.state.active_error != null &&
             <Episodes imdbId={this.state.active_imdb_id} 
               title={this.state.active_title} 
               episodes={this.state.active_episodes}
               error={this.state.active_error}/>
+            }
           </div>
         </div>
         {this.state.show_api_reqs && 
