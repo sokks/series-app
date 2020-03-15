@@ -71,6 +71,7 @@ class SeriesSearch extends React.Component {
 
   handleSearchInputChange = (e) => {
     let search_str = e.target.value;
+    search_str = search_str.trimLeft();
     console.log("input changed to", search_str);
 
     this.blockMouseHover();
@@ -300,7 +301,7 @@ class SeriesSearch extends React.Component {
                 <div>{series_item.title}</div>
                 <div className="info">
                   <div>({series_item.year})</div>
-                  <div><span role="img" aria-label="star">⭐️</span>{series_item.imdb_rating}</div>
+                  {/* <div><span role="img" aria-label="star">⭐️</span>{series_item.imdb_rating}</div> */}
                 </div>
               </div>))}
           </div>
@@ -341,8 +342,11 @@ class Episodes extends React.Component {
             <div key={idx} className="episode-item"> 
               <div className="episode-idx">{idx}</div>
               <div className="episode-info">
-                <div>{episode.Title}</div>
-                <div><span role="img" aria-label="star">⭐️</span>{episode.imdbRating}</div>
+                <div className="episode-title" style={{display:'flex'}}>
+                  <div className="episode-number">S{episode.Season}E{episode.Episode}</div>
+                  <div>{episode.Title}</div>
+                </div>
+                <div><span role="img" aria-label="star">⭐️</span> &nbsp;{episode.imdbRating}</div>
               </div>
             </div>
           ))}
@@ -455,7 +459,7 @@ class App extends React.Component {
           </div>
           {this.state.show_spinner && <Spinner/>}
           <div className="best-episodes-area">
-            {!this.state.show_spinner && this.state.active_error != null &&
+            {(!(this.state.show_spinner && this.state.active_error != null)) &&
             <Episodes imdbId={this.state.active_imdb_id} 
               title={this.state.active_title} 
               episodes={this.state.active_episodes}
