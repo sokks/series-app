@@ -24,6 +24,14 @@
 
   --max-mobile-screen-width: 500px;
 }
+html {
+  font-size: 16px;
+}
+@media screen and (min-width: 1400px) {
+  html {
+    font-size: 20px;
+  }
+}
 body {
     background-color: var(--main-bg-color);
     font-family: 'arial';

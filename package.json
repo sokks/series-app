@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^7.2.1",
     "mdbreact": "^4.25.3",
     "react": "^16.13.0",
+    "react-device-detect": "^1.11.14",
     "react-dom": "^16.13.0",
     "react-scripts": "3.4.0"
   },

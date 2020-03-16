@@ -2,8 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import {
+  isMobile,
+} from 'react-device-detect';
+
+import {
   MIN_SEARCH_LEN,
   API_HOST,
+  DEBUG_LOG,
 } from './api';
 
 import '@fortawesome/fontawesome-free/css/all.min.css'; 
@@ -39,13 +44,19 @@ class SeriesSearch extends React.Component {
   }
 
   blockMouseHover = () => {
-    console.log("block mouse hover");
-    this.setState({
-      mouse_hover_blocked: true,
-    });
+    if (DEBUG_LOG) {
+      console.log("block mouse hover");
+    }
+    if (!isMobile) {
+      this.setState({
+        mouse_hover_blocked: true,
+      });
+    }
   }
   unblockMouseHover = () => {
-    console.log("unblock mouse hover");
+    if (DEBUG_LOG) {
+      console.log("unblock mouse hover");
+    }
     this.setState({
       mouse_hover_blocked: false,
     });
@@ -54,24 +65,31 @@ class SeriesSearch extends React.Component {
   doSearch = (search_str) => {
     fetch(API_HOST+`/search/${search_str}`)
       .then(resp => {
+        console.log("search resp", resp)
         let json = resp.json();
-        console.log(json);
+        if (DEBUG_LOG) {
+          console.log(json);
+        }
         return json;
       })
       .then(resp_json => {
+        if (DEBUG_LOG) {
           console.log(resp_json);
-          this.setState({
-            found_series: resp_json,
-            show_on_flow: (resp_json && resp_json.length > 0),
-            search_err: null,
-          });
+        }
+        this.setState({
+          found_series: resp_json,
+          show_on_flow: (resp_json && resp_json.length > 0),
+          search_err: null,
+        });
       });
   }
 
   handleSearchInputChange = (e) => {
     let search_str = e.target.value;
     search_str = search_str.trimLeft();
-    console.log("input changed to", search_str);
+    if (DEBUG_LOG) {
+      console.log("input changed to", search_str);
+    }
 
     this.blockMouseHover();
 
@@ -96,7 +114,9 @@ class SeriesSearch extends React.Component {
       return;
     }
     e.preventDefault();
-    console.log("doFinalSearch of ", this.state.search_input);
+    if (DEBUG_LOG) {
+      console.log("doFinalSearch of ", this.state.search_input);
+    }
 
     if (this.state.search_input === "") {
       return;
@@ -105,21 +125,26 @@ class SeriesSearch extends React.Component {
     const doSearchAndSetFinal = (search_str) => {
       fetch(API_HOST+`/search/${search_str}`)
         .then(resp => {
+          console.log("search resp", resp);
           let json = resp.json();
-          console.log(json);
+          if (DEBUG_LOG) {
+            console.log(json);
+          }
           return json;
         })
         .then(resp_json => {
+          if (DEBUG_LOG) {
             console.log(resp_json);
-            this.setState({
-              search_input: "",
-              show_on_flow: false,
-              found_series: [],
-              search_err: null,
-              show_final: true, 
-              found_series_commited: resp_json,
-              search_err_commited: null,
-            });
+          }
+          this.setState({
+            search_input: "",
+            show_on_flow: false,
+            found_series: [],
+            search_err: null,
+            show_final: true, 
+            found_series_commited: resp_json,
+            search_err_commited: null,
+          });
         })
         .catch(() => {
           console.log("search fetch error");
@@ -135,7 +160,6 @@ class SeriesSearch extends React.Component {
     }
 
     if (this.state.on_the_flow_selected_idx >= 0) {
-      console.log("upd search_input")
       let new_found_series = this.state.found_series;
       new_found_series[this.state.on_the_flow_selected_idx].selected = false;
       new_found_series[this.state.on_the_flow_selected_idx].not_selectable = true;
@@ -161,10 +185,14 @@ class SeriesSearch extends React.Component {
 
   handleOnTheFlowSelection = (e) => {
     if (e.keyCode === 40) { // down
-      console.log("down arrow pressed");
+      if (DEBUG_LOG) {
+        console.log("down arrow pressed");
+      }
       this.goToNextDropdownItem();
     } else if (e.keyCode === 38) { // up
-      console.log("up arrow pressed");
+      if (DEBUG_LOG) {
+        console.log("up arrow pressed");
+      }
       this.goToPrevDropdownItem();
     }
   }
@@ -174,7 +202,9 @@ class SeriesSearch extends React.Component {
       return;
     }
     let selected_idx = parseInt(e.target.dataset.idx);
-    console.log("mouse hover on", selected_idx);
+    if (DEBUG_LOG) {
+      console.log("mouse hover on", selected_idx);
+    }
     let prev_selection_idx = this.state.on_the_flow_selected_idx;
     if (selected_idx !== prev_selection_idx) {
       let new_found_series = this.state.found_series;
@@ -190,7 +220,9 @@ class SeriesSearch extends React.Component {
   }
 
   handleDropdownMouseLeave = (e) => {
-    console.log("mouse leaved dropdown");
+    if (DEBUG_LOG) {
+      console.log("mouse leaved dropdown");
+    }
     let prev_selection_idx = this.state.on_the_flow_selected_idx;
     if (prev_selection_idx < 0) {
       return;
@@ -219,7 +251,7 @@ class SeriesSearch extends React.Component {
     this.setState({
       on_the_flow_selected_idx: prev_selection_idx+1,
       found_series: new_found_series,
-    }, () => {console.log("selected_idx:", this.state.on_the_flow_selected_idx);});
+    }, () => {DEBUG_LOG && console.log("selected_idx:", this.state.on_the_flow_selected_idx);});
   }
 
   goToPrevDropdownItem = () => {
@@ -238,23 +270,27 @@ class SeriesSearch extends React.Component {
     this.setState({
       on_the_flow_selected_idx: prev_selection_idx-1,
       found_series: new_found_series,
-    }, () => {console.log("selected_idx:", this.state.on_the_flow_selected_idx);});
+    }, () => {DEBUG_LOG && console.log("selected_idx:", this.state.on_the_flow_selected_idx);});
   }
 
   doFinalSeriesSelect = (imdb_id) => {
-    console.log("doFinalSeriesSelect of ", imdb_id);
+    if (DEBUG_LOG) {
+      console.log("doFinalSeriesSelect of ", imdb_id);
+    }
     this.props.onSeriesSelect(imdb_id);
   }
 
   handleSeriesSelect = (e) => {
-    // e.persist();
-    console.log("handleSeriesSelect", this.state.on_the_flow_selected_idx);
+    if (DEBUG_LOG) {
+      console.log("handleSeriesSelect", this.state.on_the_flow_selected_idx);
+    }
     let selected_idx = parseInt(e.target.dataset.idx);
-    // let selected_idx = this.state.on_the_flow_selected_idx;
     let selected_series = this.state.found_series[selected_idx];
     selected_series.not_selectable = true;
-    console.log(`e.idx: ${e.target.dataset.idx} selected_idx: ${selected_idx}, selected_series: ${selected_series}`);
-    console.log("selected series ", selected_series.title, " with imdb_id ", selected_series.imdbID);
+    if (DEBUG_LOG) {
+      console.log(`e.idx: ${e.target.dataset.idx} selected_idx: ${selected_idx}, selected_series: ${selected_series}`);
+      console.log("selected series ", selected_series.title, " with imdb_id ", selected_series.imdbID);
+    }
     this.setState({
       search_input: "",
       show_final: true, 
@@ -268,7 +304,9 @@ class SeriesSearch extends React.Component {
     let selected_idx = parseInt(e.target.dataset.idx);
     let selected_series = this.state.found_series_commited[selected_idx];
     selected_series.not_selectable = true;
-    console.log("selected series ", selected_series.title, " with imdb_id ", selected_series.imdbID);
+    if (DEBUG_LOG) {
+      console.log("selected series ", selected_series.title, " with imdb_id ", selected_series.imdbID);
+    }
     this.setState({
       show_final: true, 
       show_on_flow: false,
@@ -280,7 +318,9 @@ class SeriesSearch extends React.Component {
 
   handleEscPress = (e) => {
     if (e.keyCode === 27) { // esc
-      console.log("esc pressed")
+      if (DEBUG_LOG) {
+        console.log("esc pressed")
+      }
       this.setState({
         show_on_flow: false,
       });
@@ -415,10 +455,14 @@ class App extends React.Component {
   }
 
   onSeriesSelect = (series_imdb_id) => {
-    console.log("App has just known that you selected imdb_id ", series_imdb_id);
+    if (DEBUG_LOG) {
+      console.log("App has just known that you selected imdb_id ", series_imdb_id);
+    }
     
     const doEpisodesSearch = () => {
-      console.log("show_spinner:", this.state.show_spinner);
+      if (DEBUG_LOG) {
+        console.log("show_spinner:", this.state.show_spinner);
+      }
 
       const doFetch = () => {
         fetch(API_HOST+`/id/${series_imdb_id}`)
@@ -435,22 +479,24 @@ class App extends React.Component {
             return resp.json();;
           })
           .then(resp_json => {
+            if (DEBUG_LOG) {
               console.log("episodes resp_json", resp_json);
-              if (resp_json.error == null && (resp_json.Episodes == null || resp_json.Episodes.length === 0)) {
-                resp_json = {
-                  error: `We cannot find best episodes because there are no ratings on IMDb.`,
-                  Title: resp_json.Title,
-                  Episodes: [],
-                }
+            }
+            if (resp_json.error == null && (resp_json.Episodes == null || resp_json.Episodes.length === 0)) {
+              resp_json = {
+                error: `We cannot find best episodes because there are no ratings on IMDb.`,
+                Title: resp_json.Title,
+                Episodes: [],
               }
-              this.setState({
-                active_imdb_id: series_imdb_id,
-                active_episodes: resp_json.Episodes,
-                active_title: resp_json.Title,
-                active_error: resp_json.error,
-              }, this.setState({
-                show_spinner: false,
-              }));
+            }
+            this.setState({
+              active_imdb_id: series_imdb_id,
+              active_episodes: resp_json.Episodes,
+              active_title: resp_json.Title,
+              active_error: resp_json.error,
+            }, this.setState({
+              show_spinner: false,
+            }));
           });
       }
       // setTimeout(doFetch, 30000);
