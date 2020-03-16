@@ -139,6 +139,7 @@ class SeriesSearch extends React.Component {
       console.log("upd search_input")
       let new_found_series = this.state.found_series;
       new_found_series[this.state.on_the_flow_selected_idx].selected = false;
+      new_found_series[this.state.on_the_flow_selected_idx].not_selectable = true;
       let selected_imdb_id = new_found_series[this.state.on_the_flow_selected_idx].imdbID;
       let callback = () => {
         return this.doFinalSeriesSelect(selected_imdb_id);
@@ -249,9 +250,10 @@ class SeriesSearch extends React.Component {
   handleSeriesSelect = (e) => {
     // e.persist();
     console.log("handleSeriesSelect", this.state.on_the_flow_selected_idx);
-    // let selected_idx = parseInt(e.target.dataset.idx);
-    let selected_idx = this.state.on_the_flow_selected_idx;
+    let selected_idx = parseInt(e.target.dataset.idx);
+    // let selected_idx = this.state.on_the_flow_selected_idx;
     let selected_series = this.state.found_series[selected_idx];
+    selected_series.not_selectable = true;
     console.log(`e.idx: ${e.target.dataset.idx} selected_idx: ${selected_idx}, selected_series: ${selected_series}`);
     console.log("selected series ", selected_series.title, " with imdb_id ", selected_series.imdbID);
     this.setState({
@@ -266,6 +268,7 @@ class SeriesSearch extends React.Component {
   handleSeriesCommitedSelect = (e) => {
     let selected_idx = parseInt(e.target.dataset.idx);
     let selected_series = this.state.found_series_commited[selected_idx];
+    selected_series.not_selectable = true;
     console.log("selected series ", selected_series.title, " with imdb_id ", selected_series.imdbID);
     this.setState({
       show_final: true, 
@@ -297,7 +300,7 @@ class SeriesSearch extends React.Component {
       <div>
         <div className="search-form dropdown">
           <form>
-            <p className="h5 text-left">What series are you looking for?</p>
+            <p className="h5 text-left grey-text">What series are you looking for?</p>
             <div className="grey-text larger-text">
               <MDBInput icon="search" group type="text" size="lg" validate 
                 value={this.state.search_input}
@@ -318,7 +321,9 @@ class SeriesSearch extends React.Component {
         </div>
         {this.state.show_final && <div className="search-res">
           {this.state.found_series_commited && this.state.found_series_commited.length > 0 ? this.state.found_series_commited.map((series_item, idx) => (
-            <div key={idx} data-idx={idx} className="series-item" onClick={this.handleSeriesCommitedSelect}>
+            <div key={idx} data-idx={idx} 
+              className={"series-item" + (series_item.not_selectable ? " not-selectable" : "")}
+              onClick={this.handleSeriesCommitedSelect}>
               <div data-idx={idx} className="poster">
                 <img src={series_item.poster} style={{height: 60, maxWidth: 100}}/>
               </div>
@@ -327,7 +332,7 @@ class SeriesSearch extends React.Component {
                 <div data-idx={idx} className="year">{series_item.year}</div>
               </div>
             </div>)) : <div className="empty-search-res">
-              {this.state.search_err_commited ? <p> {/*Что-то пошло не так :( <br/> */}{this.state.search_err_commited} </p> : <p style={{paddingLeft: '10%'}}> Nothing found </p>}
+              {this.state.search_err_commited ? <p> {this.state.search_err_commited} </p> : <p style={{paddingLeft: '10%'}}> Nothing found </p>}
             </div>}
         </div>}
       </div>
@@ -346,10 +351,9 @@ class Episodes extends React.Component {
     return (
       <div className="best-episodes-list">
         {this.props.error != null ? <div className="episodes-err"> 
-          {/*Что-то пошло не так :( <br/>*/}
           {this.props.error}
         </div> : (this.props.episodes && this.props.episodes.length > 0) ? <div className="episodes-ok">
-          <div className="best-episodes-title">Best of "{this.props.title}"</div>
+          <div className="best-episodes-title grey-text">Best of "{this.props.title}"</div>
           {this.props.episodes.map((episode, idx) => (
             <div key={idx} className="episode-item"> 
               {/* <div className="episode-idx">#{idx+1}</div> */}
@@ -464,20 +468,39 @@ class App extends React.Component {
       <div className="app-area">
         <div className="content">
           <div className="header">
-            <h1>LAZY SOAP</h1>
-            <p className="description text-center" style={{color: '#dadada', fontFamily: '"Lucida Sans Unicode", "Lucida Grande", sans-serif', fontSize: '1.5rem', fontWeight: 200}}>watch only best episodes of series</p>
+            <h1 className="text-center" 
+              style={{
+                paddingLeft: '0.2em',
+                fontSize: '4rem',
+                fontWeight: 600,
+                letterSpacing: '0.2em',
+                /* font-family: 'Palatino Linotype,Book Antiqua,Palatino,serif'; */
+                fontFamily: '"Arial Black", Gadget, sans-serif',
+                // fontFamily: '"Arial", Gadget, sans-serif',
+              }}>LAZY SOAP</h1>
+            <p className="description text-center" 
+              style={{
+                color: '#dadada', 
+                fontFamily: '"Arial Narrow", "Arial", sans-serif', 
+                fontSize: '1.5rem', 
+                fontWeight: 200, 
+                letterSpacing: '0.24em'}}>
+                  watch&nbsp;only&nbsp;best episodes&nbsp;of&nbsp;series
+              </p>
           </div>
-          <div className="search-series-area">
-            <SeriesSearch onSeriesSelect={this.onSeriesSelect}/>
-          </div>
-          {this.state.show_spinner && <Spinner/>}
-          <div className="best-episodes-area">
-            {(!(this.state.show_spinner && this.state.active_error != null)) &&
-            <Episodes imdbId={this.state.active_imdb_id} 
-              title={this.state.active_title} 
-              episodes={this.state.active_episodes}
-              error={this.state.active_error}/>
-            }
+          <div className="work-area">
+            <div className="search-series-area">
+              <SeriesSearch onSeriesSelect={this.onSeriesSelect}/>
+            </div>
+            {this.state.show_spinner && <Spinner/>}
+            <div className="best-episodes-area">
+              {(!(this.state.show_spinner && this.state.active_error != null)) &&
+              <Episodes imdbId={this.state.active_imdb_id} 
+                title={this.state.active_title} 
+                episodes={this.state.active_episodes}
+                error={this.state.active_error}/>
+              }
+            </div>
           </div>
         </div>
         {this.state.show_api_reqs && 

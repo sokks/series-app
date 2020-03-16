@@ -1,24 +1,42 @@
+:root {
+  --main-bg-color: #414141;
+  /* --main-bg-color: cornflowerblue; */
+  /* --main-bg-color: hsl(54, 100%, 77%); */
+  --content-bg-color: #ffffff;
+
+  /* --title-color: hsl(14, 100%, 55%); */
+  /* --title-color: hsl(350, 99%, 46%); */
+  /* --title-color: hsl(355, 86%, 49%); */
+  --title-color: #ffffff;
+
+  /* --main-accent-color: hsl(6, 99%, 60%); */
+  /* --main-accent-color: hsl(350, 99%, 46%); */
+  --main-accent-color: hsl(355, 80%, 49%);
+
+  /* --secondary-accent-color: hsl(6, 56%, 50%); */
+  /* --secondary-accent-color: hsl(3, 53%, 35%); */
+  /* --secondary-accent-color: hsla(349, 100%, 27%, 0.5); */
+  --secondary-accent-color: hsla(355, 80%, 49%, 0.7);
+  /* --secondary-accent-color: rgba(66, 133, 244, 0.6); */
+
+  --lighter-text-color: #636363;
+  --lighter-text-color-light: #dcdcdc;
+}
 body {
-    /* background-color: cornflowerblue; */
-    background-color: #414141;
-    /* background-color: hsl(54, 100%, 77%); */
-    height: 100vh;
+    background-color: var(--main-bg-color);
     font-family: 'arial';
 }
 
 .content {
-    height: 100vh; /* TODO: why 100% doesn't work?*/
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     overflow: auto;
-    /* justify-content: space-evenly; */
-    /* background-color: cornflowerblue; */
-    
+    justify-content: space-evenly;
 }
 
 .header {
-    /* background-color: aqua; */
     height: 30%;
     min-height: 120px;
     font-weight: 100;
@@ -28,12 +46,15 @@ body {
 }
 
 .header h1 {
-  font-size: 4rem;
-  font-weight: 400;
-  letter-spacing: 0.2em;
-  /* color: #212529; */
-  color: white;
-  font-family: 'Palatino Linotype,Book Antiqua,Palatino,serif';
+  color: var(--title-color);
+}
+
+.work-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
 }
 
 .search-series-area {
@@ -49,31 +70,48 @@ body {
   margin: 2% 10%;
 }
 
-/* там еще иконка 
-.search-form form input:focus {
-  border-bottom: 1px solid rgb(226, 112, 6) !important;
-  box-shadow: 0 1px 0 0 rgb(226, 112, 6) !important;
+.md-form .prefix {
+  color: var(--secondary-accent-color);
 }
-*/
+.md-form .prefix.active {
+  color: var(--main-accent-color);
+}
+.search-form form input {
+  border-bottom: 1px solid var(--secondary-accent-color) !important;
+  box-shadow: 0 1px 0 0 var(--secondary-accent-color) !important;
+}
+.search-form form input:focus {
+  border-bottom: 1px solid var(--main-accent-color) !important;
+  box-shadow: 0 1px 0 0 var(--main-accent-color) !important;
+}
 
 .dropdown {
   position: relative;
   display: inline-block;
+
+  transition: all 0.5s;
 }
 
 .dropdown-content {
-  display: none;
+  /* display: none; */
+  visibility: hidden;
   position: absolute;
-  background-color: rgba(255,255,255);
+  background-color: var(--content-bg-color);
   width: 93%;
   max-width: 700px;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   z-index: 1;
   margin-left: 7%;
+
+  transform: translateY(-2em);
+  transition: all 0.3s ease-in-out 0s, visibility 0s linear 0.3s;
 }
 
 .dropdown-content.show {
-  display: block;
+  /* display: block; */
+  visibility: visible;
+  transform: translateY(0%);
+  transition-delay: 0s, 0s, 0.3s; /* this removes the transition delay so the menu will be visible while the other styles transition */
 }
 
 .search-res-on-the-flow .series-item {
@@ -82,8 +120,7 @@ body {
 
 
 .search-res-on-the-flow .series-item.selected {
-  /* background-color: rgba(226, 112, 6, 0.6); */
-  background-color: rgba(66, 133, 244, 0.6);
+  background-color: var(--secondary-accent-color);
   color: white;
   cursor: pointer;
 }
@@ -95,12 +132,13 @@ body {
 }
 
 .search-res-on-the-flow .series-item .info .title{
-  /* width: 60%; */
   font-weight: 400;
 }
 .search-res-on-the-flow .series-item .info .year{
-  /* width: 40%; */
-  color: #636363;
+  color: var(--lighter-text-color);
+}
+.search-res-on-the-flow .series-item.selected .info .year{
+  color: var(--lighter-text-color-light);
 }
 
 .search-res {
@@ -112,9 +150,8 @@ body {
   padding: 15px 20px;
 }
 
-.search-res .series-item:hover {
-  /* background-color: rgb(226, 112, 6); */
-  background-color: rgba(66, 133, 244, 0.8);
+.search-res .series-item:hover:not(.not-selectable) {
+  background-color: var(--secondary-accent-color);
   color: white;
   cursor: pointer;
 }
@@ -133,8 +170,12 @@ body {
 
 .search-res .series-item .info .year {
   font-size: 0.9em;
-  color: #636363;
+  color: var(--lighter-text-color);
 }
+.search-res .series-item:hover:not(.not-selectable) .info .year {
+  color: var(--lighter-text-color-light);
+}
+
 
 .search-res .series-item .poster {
   width: 20%;
@@ -152,7 +193,6 @@ body {
   margin-bottom: 40px;
   width: 80%;
   max-width: 800px;
-  /* overflow: auto; */
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -167,6 +207,7 @@ body {
 
 .best-episodes-title {
   padding: 30px 30px 30px 50px;
+  /* font-style: italic; */
 }
 
 .episode-item {
@@ -183,7 +224,7 @@ body {
   min-width: 30px;
 }
 
-.episode-title {
+.episode-item .episode-title {
   font-weight: 600;
   font-size: 0.9em;
 }
@@ -192,14 +233,15 @@ body {
   width: 40px;
   min-width: 30px;
   margin-right: 20px;
-  color: #636363;
+  color: var(--lighter-text-color);
+  font-size: 0.9em;
 }
 
 .episode-item .episode-rating {
   min-width: 50px;
   font-weight: 600;
   font-size: 0.9em;
-  color: #636363;
+  color: var(--lighter-text-color);
 }
 
 .episode-item .episode-info {
