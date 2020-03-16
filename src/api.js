@@ -4,33 +4,12 @@ if (process.env.NODE_ENV !== 'production') {
 }
 export const MIN_SEARCH_LEN = 4;
 
-var apiCalls = [];
 
-const onApiCall = (path, resp_ip) => {
-  console.log("App has just known that api call was made", path, resp_ip);
-  apiCalls = [...apiCalls, {path: path, resp_ip: resp_ip}];
+export const onApiCall = (path, resp_ip) => {
+  console.log("API CALL", path, resp_ip);
 };
 
-export const getApiCalls = () => {
-  return apiCalls;
-}; 
 
-
-export async function callApi(path) {
-  try {
-    let response = await fetch(API_HOST + path, {});
-
-    if (response.status === 200) {
-      let json = await response.json();
-      console.log(json);
-      return { json };
-    } else {
-      return { errors: { message: 'Ошибка сервера' } }
-    }
-  } catch (errors) {
-    return { errors };
-  }
-}
 
 const getExampleSeriesData = (search_str) => {
   if (search_str === "Как") {

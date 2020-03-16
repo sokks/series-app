@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import {
-  getApiCalls,
   MIN_SEARCH_LEN,
   API_HOST,
 } from './api';
@@ -360,7 +359,7 @@ class Episodes extends React.Component {
               <div className="episode-info">
                 <div className="episode-title" style={{display:'flex'}}>
                   <div className="episode-number">S{episode.Season}E{episode.Episode}</div>
-                  <div>{episode.Title}</div>
+                  <div className="episode-title text-wrap">{episode.Title}</div>
                 </div>
                 <div className="episode-rating"><span role="img" aria-label="star">⭐️</span> &nbsp;{episode.imdbRating}</div>
               </div>
@@ -376,7 +375,7 @@ class ApiReqs extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      reqs: getApiCalls(),
+      reqs: [],
     }
   }
 
@@ -471,7 +470,6 @@ class App extends React.Component {
             <h1 className="text-center" 
               style={{
                 paddingLeft: '0.2em',
-                fontSize: '4rem',
                 fontWeight: 600,
                 letterSpacing: '0.2em',
                 /* font-family: 'Palatino Linotype,Book Antiqua,Palatino,serif'; */
@@ -482,7 +480,6 @@ class App extends React.Component {
               style={{
                 color: '#dadada', 
                 fontFamily: '"Arial Narrow", "Arial", sans-serif', 
-                fontSize: '1.5rem', 
                 fontWeight: 200, 
                 letterSpacing: '0.24em'}}>
                   watch&nbsp;only&nbsp;best episodes&nbsp;of&nbsp;series
