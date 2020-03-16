@@ -36,7 +36,7 @@ class SeriesSearch extends React.Component {
       search_err_commited: null,
       show_final: false,
 
-      mouse_hover_blocked: true,
+      mouse_hover_blocked: !isMobile,
     };
     this.handleEscPress = this.handleEscPress.bind(this);
     this.goToNextDropdownItem = this.goToNextDropdownItem.bind(this);
