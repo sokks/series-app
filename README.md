@@ -1,4 +1,8 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# series-app
+
+Frontend for https://soap.nikscorp.com
+
+
 
 ## Available Scripts
 
