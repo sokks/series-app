@@ -31,7 +31,7 @@ class SeriesSearch extends React.Component {
       search_err: null,
       show_on_flow: false,
       on_the_flow_selected_idx: -1,
-      
+      language: "en",
       found_series_commited: [],
       search_err_commited: null,
       show_final: false,
@@ -77,8 +77,9 @@ class SeriesSearch extends React.Component {
           console.log(resp_json);
         }
         this.setState({
-          found_series: resp_json,
-          show_on_flow: (resp_json && resp_json.length > 0),
+          found_series: resp_json.searchResults,
+          language: resp_json.language,
+          show_on_flow: (resp_json && resp_json.searchResults && resp_json.searchResults.length > 0),
           search_err: null,
         });
       });
@@ -101,6 +102,7 @@ class SeriesSearch extends React.Component {
       if (search_str.length < MIN_SEARCH_LEN) {
         this.setState({
           found_series: [],
+          language: this.state.language,
           search_err: null,
         });
         return;
@@ -142,7 +144,8 @@ class SeriesSearch extends React.Component {
             found_series: [],
             search_err: null,
             show_final: true, 
-            found_series_commited: resp_json,
+            found_series_commited: resp_json.searchResults,
+            language: resp_json.language,
             search_err_commited: null,
           });
         })
@@ -151,6 +154,7 @@ class SeriesSearch extends React.Component {
           this.setState({
             show_on_flow: false,
             found_series: [],
+            language: this.state.language,
             search_err: null,
             show_final: true, 
             found_series_commited: [],
@@ -163,7 +167,7 @@ class SeriesSearch extends React.Component {
       let new_found_series = this.state.found_series;
       new_found_series[this.state.on_the_flow_selected_idx].selected = false;
       new_found_series[this.state.on_the_flow_selected_idx].not_selectable = true;
-      let selected_imdb_id = new_found_series[this.state.on_the_flow_selected_idx].imdbID;
+      let selected_imdb_id = new_found_series[this.state.on_the_flow_selected_idx].id;
       let callback = () => {
         return this.doFinalSeriesSelect(selected_imdb_id);
       }
@@ -175,6 +179,7 @@ class SeriesSearch extends React.Component {
         search_err: null,
         on_the_flow_selected_idx: -1,
         show_final: true,
+        language: this.state.language,
         found_series_commited: [new_found_series[this.state.on_the_flow_selected_idx]],
         search_err_commited: null,
       }, callback);
@@ -215,6 +220,7 @@ class SeriesSearch extends React.Component {
       this.setState({
         on_the_flow_selected_idx: selected_idx,
         found_series: new_found_series,
+        language: this.state.language,
       });
     }
   }
@@ -232,6 +238,7 @@ class SeriesSearch extends React.Component {
     this.setState({
       on_the_flow_selected_idx: -1,
       found_series: new_found_series,
+      language: this.state.language,
     });
   }
 
@@ -251,6 +258,7 @@ class SeriesSearch extends React.Component {
     this.setState({
       on_the_flow_selected_idx: prev_selection_idx+1,
       found_series: new_found_series,
+      language: this.state.language,
     }, () => {DEBUG_LOG && console.log("selected_idx:", this.state.on_the_flow_selected_idx);});
   }
 
@@ -270,6 +278,7 @@ class SeriesSearch extends React.Component {
     this.setState({
       on_the_flow_selected_idx: prev_selection_idx-1,
       found_series: new_found_series,
+      language: this.state.language,
     }, () => {DEBUG_LOG && console.log("selected_idx:", this.state.on_the_flow_selected_idx);});
   }
 
@@ -277,7 +286,7 @@ class SeriesSearch extends React.Component {
     if (DEBUG_LOG) {
       console.log("doFinalSeriesSelect of ", imdb_id);
     }
-    this.props.onSeriesSelect(imdb_id);
+    this.props.onSeriesSelect(imdb_id, this.state.language);
   }
 
   handleSeriesSelect = (e) => {
@@ -289,15 +298,16 @@ class SeriesSearch extends React.Component {
     selected_series.not_selectable = true;
     if (DEBUG_LOG) {
       console.log(`e.idx: ${e.target.dataset.idx} selected_idx: ${selected_idx}, selected_series: ${selected_series}`);
-      console.log("selected series ", selected_series.title, " with imdb_id ", selected_series.imdbID);
+      console.log("selected series ", selected_series.title, " with imdb_id ", selected_series.id);
     }
     this.setState({
       search_input: "",
       show_final: true, 
       show_on_flow: false,
+      language: this.state.language,
       found_series_commited: [selected_series],
       search_err_commited: null,
-    }, this.props.onSeriesSelect(selected_series.imdbID));
+    }, this.props.onSeriesSelect(selected_series.id, this.state.language));
   }
 
   handleSeriesCommitedSelect = (e) => {
@@ -305,15 +315,17 @@ class SeriesSearch extends React.Component {
     let selected_series = this.state.found_series_commited[selected_idx];
     selected_series.not_selectable = true;
     if (DEBUG_LOG) {
-      console.log("selected series ", selected_series.title, " with imdb_id ", selected_series.imdbID);
+      console.log(this.state.language)
+      console.log("selected series ", selected_series.title, " with imdb_id ", selected_series.id);
     }
     this.setState({
       show_final: true, 
       show_on_flow: false,
+      language: this.state.language,
       found_series_commited: [selected_series],
       search_err_commited: null,
     });
-    this.props.onSeriesSelect(selected_series.imdbID);
+    this.props.onSeriesSelect(selected_series.id, this.state.language);
   }
 
   handleEscPress = (e) => {
@@ -353,7 +365,7 @@ class SeriesSearch extends React.Component {
               <div key={idx} data-idx={idx} className={"series-item" + (series_item.selected ? " selected" : "")} onClick={this.handleSeriesSelect} onMouseEnter={this.hadleSeriesItemHover}>
                 <div className="info" data-idx={idx}>
                   <div data-idx={idx} className="title">{series_item.title}</div>
-                  <div data-idx={idx} className="year">({series_item.year})</div>
+                  <div data-idx={idx} className="year">({series_item.firstAirDate})</div>
                 </div>
               </div>))}
           </div>
@@ -368,7 +380,7 @@ class SeriesSearch extends React.Component {
               </div>
               <div className="info" data-idx={idx}>
                 <div data-idx={idx} className="title">{series_item.title}</div>
-                <div data-idx={idx} className="year">{series_item.year}</div>
+                <div data-idx={idx} className="year">{series_item.firstAirDate}</div>
               </div>
             </div>)) : <div className="empty-search-res">
               {this.state.search_err_commited ? <p> {this.state.search_err_commited} </p> : <p style={{paddingLeft: '10%'}}> Nothing found </p>}
@@ -398,10 +410,10 @@ class Episodes extends React.Component {
               {/* <div className="episode-idx">#{idx+1}</div> */}
               <div className="episode-info">
                 <div className="episode-title" style={{display:'flex'}}>
-                  <div className="episode-number">S{episode.Season}E{episode.Episode}</div>
-                  <div className="episode-title text-wrap">{episode.Title}</div>
+                  <div className="episode-number">S{episode.season}E{episode.number}</div>
+                  <div className="episode-title text-wrap">{episode.title}</div>
                 </div>
-                <div className="episode-rating"><span role="img" aria-label="star">⭐️</span> &nbsp;{episode.imdbRating}</div>
+                <div className="episode-rating"><span role="img" aria-label="star">⭐️</span> &nbsp;{episode.rating}</div>
               </div>
             </div>
           ))}
@@ -454,9 +466,10 @@ class App extends React.Component {
     }
   }
 
-  onSeriesSelect = (series_imdb_id) => {
+  onSeriesSelect = (series_imdb_id, language) => {
     if (DEBUG_LOG) {
       console.log("App has just known that you selected imdb_id ", series_imdb_id);
+      console.log(language)
     }
     
     const doEpisodesSearch = () => {
@@ -465,7 +478,7 @@ class App extends React.Component {
       }
 
       const doFetch = () => {
-        fetch(API_HOST+`/id/${series_imdb_id}`)
+        fetch(API_HOST+`/id/${series_imdb_id}?language=${language}`)
           .then(resp => {
             console.log("episodes resp", resp);
             if (resp.status !== 200) {
@@ -482,17 +495,17 @@ class App extends React.Component {
             if (DEBUG_LOG) {
               console.log("episodes resp_json", resp_json);
             }
-            if (resp_json.error == null && (resp_json.Episodes == null || resp_json.Episodes.length === 0)) {
+            if (resp_json.error == null && (resp_json.episodes == null || resp_json.episodes.length === 0)) {
               resp_json = {
                 error: `We cannot find best episodes because there are no ratings on IMDb.`,
-                Title: resp_json.Title,
+                Title: resp_json.title,
                 Episodes: [],
               }
             }
             this.setState({
               active_imdb_id: series_imdb_id,
-              active_episodes: resp_json.Episodes,
-              active_title: resp_json.Title,
+              active_episodes: resp_json.episodes,
+              active_title: resp_json.title,
               active_error: resp_json.error,
             }, this.setState({
               show_spinner: false,
